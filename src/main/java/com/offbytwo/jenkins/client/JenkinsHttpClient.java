@@ -8,6 +8,9 @@ package com.offbytwo.jenkins.client;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.offbytwo.jenkins.client.validator.HttpResponseValidator;
 import com.offbytwo.jenkins.model.BaseModel;
 
@@ -26,8 +29,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,7 +106,7 @@ public class JenkinsHttpClient {
         HttpResponse response = client.execute(getMethod, localContext);
         try {
             httpResponseValidator.validateResponse(response);
-            return objectFromResponse(cls, response);
+            return httpResponseValidator.isNotFound(response) ? null : objectFromResponse(cls, response);
         } finally {
             EntityUtils.consume(response.getEntity());
             releaseConnection(getMethod);
@@ -124,13 +125,17 @@ public class JenkinsHttpClient {
         HttpResponse response = client.execute(getMethod, localContext);
         try {
             httpResponseValidator.validateResponse(response);
-            Scanner s = new Scanner(response.getEntity().getContent());
-            s.useDelimiter("\\z");
-            StringBuffer sb = new StringBuffer();
-            while (s.hasNext()) {
+            if (response.getStatusLine().getStatusCode() != 404) {
+              Scanner s = new Scanner(response.getEntity().getContent());
+              s.useDelimiter("\\z");
+              StringBuffer sb = new StringBuffer();
+              while (s.hasNext()) {
                 sb.append(s.next());
+              }
+              return sb.toString();
+            } else {
+              return null;
             }
-            return sb.toString();
         } finally {
             releaseConnection(getMethod);
         }
@@ -148,7 +153,7 @@ public class JenkinsHttpClient {
         try {
             HttpResponse response = client.execute(getMethod, localContext);
             httpResponseValidator.validateResponse(response);
-            return response.getEntity().getContent();
+            return httpResponseValidator.isNotFound(response) ? null : response.getEntity().getContent();
         } finally {
             releaseConnection(getMethod);
         }
@@ -182,7 +187,7 @@ public class JenkinsHttpClient {
             httpResponseValidator.validateResponse(response);
 
             if (cls != null) {
-                return objectFromResponse(cls, response);
+                return httpResponseValidator.isNotFound(response) ? null : objectFromResponse(cls, response);
             } else {
                 return null;
             }
@@ -213,14 +218,19 @@ public class JenkinsHttpClient {
         }
         HttpResponse response = client.execute(request, localContext);
         httpResponseValidator.validateResponse(response);
+
         try {
-            InputStream content = response.getEntity().getContent();
-            Scanner s = new Scanner(content);
-            StringBuffer sb = new StringBuffer();
-            while (s.hasNext()) {
+            if (!httpResponseValidator.isNotFound(response)) {
+              InputStream content = response.getEntity().getContent();
+              Scanner s = new Scanner(content);
+              StringBuffer sb = new StringBuffer();
+              while (s.hasNext()) {
                 sb.append(s.next());
+              }
+              return sb.toString();
+            } else {
+              return null;
             }
-            return sb.toString();
         } finally {
             EntityUtils.consume(response.getEntity());
             releaseConnection(request);
@@ -270,8 +280,7 @@ public class JenkinsHttpClient {
     private ObjectMapper getDefaultMapper() {
         ObjectMapper mapper = new ObjectMapper();
         DeserializationConfig deserializationConfig = mapper.getDeserializationConfig();
-        mapper.setDeserializationConfig(deserializationConfig
-            .without(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES));
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper;
     }
 
