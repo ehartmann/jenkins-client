@@ -43,10 +43,6 @@ public class Computer extends BaseModel {
         return client.get("/computer/" + displayName.replaceAll("master", "(master)"), ComputerWithDetails.class);
     }
 
-    public ComputerConfig getConfig() throws IOException {
-      return client.getXml("/computer/" + displayName.replaceAll("master", "(master)") + "/config.xml", ComputerConfig.class);
-    }
-
     private static class MapEntryToQueryStringPair implements Function<Map.Entry<String, String>, String> {
         @Override
         public String apply(Map.Entry<String, String> entry) {

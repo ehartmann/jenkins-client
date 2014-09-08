@@ -10,11 +10,15 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.offbytwo.jenkins.client.JenkinsHttpClient;
 import com.offbytwo.jenkins.model.*;
+import com.offbytwo.jenkins.tools.Utils;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +27,6 @@ import java.util.Map;
  */
 public class JenkinsServer {
     private final JenkinsHttpClient client;
-
 
     /**
      * Create a new Jenkins server reference given only the server address
@@ -167,6 +170,31 @@ public class JenkinsServer {
         });
     }
 
+  /**
+   * Get a computer on the server (at the summary level)
+   *
+   * @return list of defined computers (summary level, for details @see Computer#details
+   * @throws IOException
+   */
+  public Computer getComputer(String name) throws IOException {
+    try {
+      return client.get("computer/" + name, Computer.class);
+    } catch (HttpResponseException ex) {
+      return null;
+    }
+  }
+
+  public void createNode(Node node) throws IOException {
+    List<NameValuePair> parameters = new ArrayList<NameValuePair>(3);
+    parameters.add(new BasicNameValuePair("name", node.getName()));
+    parameters.add(new BasicNameValuePair("type", node.getType()));
+    parameters.add(new BasicNameValuePair("json", Utils.getJsonMapper().writeValueAsString(node)));
+    client.postJSON("/computer/doCreateItem", parameters);
+  }
+
+  public void deleteNode(String nodeName) throws IOException {
+    client.postJSON(String.format("/computer/%s/doDelete", nodeName), new ArrayList<NameValuePair>());
+  }
 
     public String executeScript(String script) throws IOException {
       return client.executeScript(script);

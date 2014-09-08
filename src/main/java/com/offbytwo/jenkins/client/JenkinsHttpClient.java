@@ -6,19 +6,18 @@
 
 package com.offbytwo.jenkins.client;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.io.CharStreams;
 import com.offbytwo.jenkins.client.validator.HttpResponseValidator;
 import com.offbytwo.jenkins.model.BaseModel;
 import com.offbytwo.jenkins.model.Crumb;
+import com.offbytwo.jenkins.tools.Utils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -49,8 +48,6 @@ public class JenkinsHttpClient {
     private BasicHttpContext localContext;
     private HttpResponseValidator httpResponseValidator;
 
-    private ObjectMapper jsonMapper;
-    private ObjectMapper xmlMapper;
     private String context;
 
     /**
@@ -65,8 +62,6 @@ public class JenkinsHttpClient {
             context += "/";
         }
         this.uri = uri;
-        this.jsonMapper = getJsonMapper();
-        this.xmlMapper = getXmlMapper();
         this.client = defaultHttpClient;
         this.httpResponseValidator = new HttpResponseValidator();
     }
@@ -210,7 +205,7 @@ public class JenkinsHttpClient {
         }
 
         if (data != null) {
-            StringEntity stringEntity = new StringEntity(jsonMapper.writeValueAsString(data), "application/json");
+            StringEntity stringEntity = new StringEntity(Utils.getJsonMapper().writeValueAsString(data), "application/json");
             request.setEntity(stringEntity);
         }
         HttpResponse response = client.execute(request, localContext);
@@ -270,7 +265,6 @@ public class JenkinsHttpClient {
     }
   }
 
-
     /**
      * Perform a POST request of XML (instead of using json jsonMapper) and return a string rendering of the response
      * entity.
@@ -311,6 +305,36 @@ public class JenkinsHttpClient {
         }
     }
 
+  /**
+   * Perform a POST request of JSON (instead of using json mapper) and return a string rendering of the response entity.
+   *
+   * @param path path to request, can be relative or absolute
+   * @param parameters data data to post
+   * @return A string containing the xml response (if present)
+   * @throws IOException
+   */
+  public String postJSON(String path, List<NameValuePair> parameters) throws IOException {
+    HttpPost request = new HttpPost(postApi(path));
+    request.setEntity(new UrlEncodedFormEntity(parameters));
+    HttpResponse response = client.execute(request, localContext);
+    int status = response.getStatusLine().getStatusCode();
+    if (status < 200 || status >= 400) {
+      throw new HttpResponseException(status, response.getStatusLine().getReasonPhrase());
+    }
+    try {
+      InputStream content = response.getEntity().getContent();
+      Scanner s = new Scanner(content);
+      StringBuilder sb = new StringBuilder();
+      while (s.hasNext()) {
+        sb.append(s.next());
+      }
+      return sb.toString();
+    } finally {
+      EntityUtils.consume(response.getEntity());
+      releaseConnection(request);
+    }
+  }
+
     /**
      * Perform POST request that takes no parameters and returns no response
      *
@@ -344,6 +368,10 @@ public class JenkinsHttpClient {
         return uri.resolve("/").resolve(path);
     }
 
+    private URI postApi(String path) {
+      return uri.resolve("/").resolve(correctPath(path));
+    }
+
     private URI correctPath(String path) {
       if (!path.toLowerCase().matches("https?://.*")) {
         path = urlJoin(this.context, path);
@@ -355,24 +383,12 @@ public class JenkinsHttpClient {
         T result;
         InputStream content = response.getEntity().getContent();
         if (response.getFirstHeader("Content-Type").getValue().contains("application/xml")) {
-          result = xmlMapper.readValue(content, cls);
+          result = Utils.getXmlMapper().readValue(content, cls);
         } else {
-          result = jsonMapper.readValue(content, cls);
+          result = Utils.getJsonMapper().readValue(content, cls);
         }
         result.setClient(this);
         return result;
-    }
-
-    private ObjectMapper getJsonMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper;
-    }
-
-    private ObjectMapper getXmlMapper() {
-      ObjectMapper mapper = new XmlMapper();
-      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      return mapper;
     }
 
   private void releaseConnection(HttpRequestBase httpRequestBase) {
