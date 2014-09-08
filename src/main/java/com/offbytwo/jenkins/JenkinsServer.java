@@ -6,18 +6,17 @@
 
 package com.offbytwo.jenkins;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.offbytwo.jenkins.client.JenkinsHttpClient;
 import com.offbytwo.jenkins.model.*;
 import org.apache.http.client.HttpResponseException;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The main starting point for interacting with a Jenkins server.
@@ -95,18 +94,17 @@ public class JenkinsServer {
     public JobWithDetails getJob(String jobName) throws  IOException {
         try {
             JobWithDetails job = client.get("/job/"+encode(jobName),JobWithDetails.class);
-            job.setClient(client);
+            if (job != null) {
+              job.setClient(client);
+            }
 
             return job;
         } catch (HttpResponseException e) {
-            if(e.getStatusCode() == 404) {
-                return null;
-            }
             throw e;
         }
 
     }
-    
+
     public MavenJobWithDetails getMavenJob(String jobName) throws IOException {
         try {
             MavenJobWithDetails job = client.get("/job/"+encode(jobName), MavenJobWithDetails.class);
@@ -167,6 +165,11 @@ public class JenkinsServer {
                 return computer.getDisplayName().toLowerCase();
             }
         });
+    }
+
+
+    public String executeScript(String script) throws IOException {
+      return client.executeScript(script);
     }
 
     /**

@@ -6,11 +6,7 @@
 
 package com.offbytwo.jenkins;
 
-import com.offbytwo.jenkins.model.BuildResult;
-import com.offbytwo.jenkins.model.BuildWithDetails;
-import com.offbytwo.jenkins.model.Computer;
-import com.offbytwo.jenkins.model.Job;
-import com.offbytwo.jenkins.model.JobWithDetails;
+import com.offbytwo.jenkins.model.*;
 import hudson.model.Cause;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
@@ -23,9 +19,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class JenkinsServerIT {
 
@@ -88,6 +82,18 @@ public class JenkinsServerIT {
     }
 
     @Test
+    public void shouldReturnConfigOfComputer() throws Exception {
+      Map<String, Computer> computers = server.getComputers();
+      //assertTrue(computers.get(JENKINS_MASTER).getConfig().getNumExecutors().equals(JENKINS_MASTER));
+    }
+
+    @Test
+    public void shouldExecuteScript() throws Exception {
+      assertEquals("The server should return Hello", "Hello\n", server.executeScript("println \"Hello\""));
+      assertEquals("The server should return deafult", "dafault\n", server.executeScript("Jenkins.instance.JDKs.each() { println it.name }"));
+    }
+
+    @Test
     public void shouldReturnDetailOfLablel() throws Exception {
         assertTrue(server.getLabel(JENKINS_MASTER).getName().equals(JENKINS_MASTER));
     }
@@ -147,6 +153,7 @@ public class JenkinsServerIT {
         job.build();
 
         while(project.isInQueue()|| project.isBuilding()) {}
+        job = server.getJob(jobName);
         assertTrue(job.getBuilds().size() == 1);
     }
 

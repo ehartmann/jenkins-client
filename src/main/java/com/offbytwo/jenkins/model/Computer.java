@@ -7,14 +7,12 @@
 package com.offbytwo.jenkins.model;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import static java.net.URLEncoder.encode;
-import static org.apache.commons.lang.StringUtils.join;
 
 public class Computer extends BaseModel {
     private String displayName;
@@ -43,6 +41,10 @@ public class Computer extends BaseModel {
 
     public ComputerWithDetails details() throws IOException {
         return client.get("/computer/" + displayName.replaceAll("master", "(master)"), ComputerWithDetails.class);
+    }
+
+    public ComputerConfig getConfig() throws IOException {
+      return client.getXml("/computer/" + displayName.replaceAll("master", "(master)") + "/config.xml", ComputerConfig.class);
     }
 
     private static class MapEntryToQueryStringPair implements Function<Map.Entry<String, String>, String> {

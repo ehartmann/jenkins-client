@@ -14,7 +14,7 @@
 
     <groupId>com.offbytwo.jenkins</groupId>
     <artifactId>jenkins-client</artifactId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -33,8 +33,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <targetJdk>1.6</targetJdk>
         <!-- Version of Jenkins to use for Integration Tests -->
-        <jenkins-version>1.447.2</jenkins-version>
-        <jackson.version>2.4.0</jackson.version>
+        <jenkins-version>1.565.2</jenkins-version>
+        <jackson.version>2.4.2</jackson.version>
     </properties>
 
     <licenses>
@@ -75,6 +75,19 @@
         <artifactId>jackson-dataformat-xml</artifactId>
         <version>${jackson.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.woodstox</groupId>
+        <artifactId>woodstox-core-asl</artifactId>
+        <version>4.4.0</version>
+      </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
