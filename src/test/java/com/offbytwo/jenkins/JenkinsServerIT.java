@@ -90,7 +90,7 @@ public class JenkinsServerIT {
     @Test
     public void shouldExecuteScript() throws Exception {
       assertEquals("The server should return Hello", "Hello\n", server.executeScript("println \"Hello\""));
-      assertEquals("The server should return deafult", "dafault\n", server.executeScript("Jenkins.instance.JDKs.each() { println it.name }"));
+      assertEquals("The server should return deafult", "default\n", server.executeScript("Jenkins.instance.JDKs.each() { println it.name }"));
     }
 
     @Test
