@@ -17,5 +17,6 @@ public class MainViewTest {
         MainView mainView = new MainView();
         assertNotNull(mainView.getJobs());
         assertEquals(0, mainView.getJobs().size());
+      assertEquals(0, mainView.getViews().size());
     }
 }

@@ -94,6 +94,11 @@ public class JenkinsServerIT {
     }
 
     @Test
+    public void shouldCreateDeleteAView() throws Exception {
+      
+    }
+
+    @Test
     public void shouldReturnDetailOfLablel() throws Exception {
         assertTrue(server.getLabel(JENKINS_MASTER).getName().equals(JENKINS_MASTER));
     }
