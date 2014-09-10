@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>Jenkins Client</name>
-    <url>http://github.com/RisingOak/jenkins-client</url>
+    <url>http://github.com/ehartmann/jenkins-client</url>
     <description>A Jenkins API client for Java</description>
 
     <groupId>com.offbytwo.jenkins</groupId>
