@@ -313,15 +313,17 @@ public class JenkinsHttpClient {
    * @return A string containing the xml response (if present)
    * @throws IOException
    */
-  public String postJSON(String path, List<NameValuePair> parameters) throws IOException {
+  public String post_json(String path, List<NameValuePair> parameters) throws IOException {
     HttpPost request = new HttpPost(postApi(path));
     request.setEntity(new UrlEncodedFormEntity(parameters));
-    HttpResponse response = client.execute(request, localContext);
-    int status = response.getStatusLine().getStatusCode();
-    if (status < 200 || status >= 400) {
-      throw new HttpResponseException(status, response.getStatusLine().getReasonPhrase());
-    }
+    HttpResponse response = null;
     try {
+      response = client.execute(request, localContext);
+      int status = response.getStatusLine().getStatusCode();
+      if (status < 200 || status >= 400) {
+        throw new HttpResponseException(status, response.getStatusLine().getReasonPhrase());
+      }
+
       InputStream content = response.getEntity().getContent();
       Scanner s = new Scanner(content);
       StringBuilder sb = new StringBuilder();
@@ -330,7 +332,9 @@ public class JenkinsHttpClient {
       }
       return sb.toString();
     } finally {
-      EntityUtils.consume(response.getEntity());
+      if (response != null) {
+        EntityUtils.consume(response.getEntity());
+      }
       releaseConnection(request);
     }
   }

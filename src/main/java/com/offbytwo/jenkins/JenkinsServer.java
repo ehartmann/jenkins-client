@@ -189,23 +189,23 @@ public class JenkinsServer {
     parameters.add(new BasicNameValuePair("name", node.getName()));
     parameters.add(new BasicNameValuePair("type", node.getType()));
     parameters.add(new BasicNameValuePair("json", Utils.getJsonMapper().writeValueAsString(node)));
-    client.postJSON("/computer/doCreateItem", parameters);
+    client.post_json("/computer/doCreateItem", parameters);
   }
 
   public void deleteNode(String nodeName) throws IOException {
-    client.postJSON(String.format("/computer/%s/doDelete", nodeName), new ArrayList<NameValuePair>());
+    client.post_json(String.format("/computer/%s/doDelete", nodeName), new ArrayList<NameValuePair>());
   }
 
   public void addJobToView(String jobName, String viewName) throws IOException {
     List<NameValuePair> parameters = new ArrayList<NameValuePair>(3);
     parameters.add(new BasicNameValuePair("name", jobName));
-    client.postJSON("/view/" + viewName + "/addJobToView", parameters);
+    client.post_json("/view/" + viewName + "/addJobToView", parameters);
   }
 
   public void removeJobFromView(String jobName, String viewName) throws IOException {
     List<NameValuePair> parameters = new ArrayList<NameValuePair>(3);
     parameters.add(new BasicNameValuePair("name", jobName));
-    client.postJSON("/view/" + viewName + "/removeJobFromView", parameters);
+    client.post_json("/view/" + viewName + "/removeJobFromView", parameters);
   }
 
   public View getView(String viewName) throws IOException {
