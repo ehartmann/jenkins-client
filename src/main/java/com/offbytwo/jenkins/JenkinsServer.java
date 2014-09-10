@@ -125,7 +125,6 @@ public class JenkinsServer {
     /**
      * Create a job on the server using the provided xml
      *
-     * @return the new job object
      * @throws IOException
      */
     public void createJob(String jobName, String jobXml) throws IOException {
@@ -227,7 +226,6 @@ public class JenkinsServer {
     /**
      * Update the xml description of an existing job
      *
-     * @return the new job object
      * @throws IOException
      */
     public void updateJob(String jobName, String jobXml) throws IOException {
