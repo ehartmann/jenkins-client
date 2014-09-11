@@ -192,24 +192,24 @@ public class JenkinsServer {
   }
 
   public void deleteNode(String nodeName) throws IOException {
-    client.post_json(String.format("/computer/%s/doDelete", nodeName), new ArrayList<NameValuePair>());
+    client.post_json(String.format("/computer/%s/doDelete", encode(nodeName)), new ArrayList<NameValuePair>());
   }
 
   public void addJobToView(String jobName, String viewName) throws IOException {
     List<NameValuePair> parameters = new ArrayList<NameValuePair>(3);
     parameters.add(new BasicNameValuePair("name", jobName));
-    client.post_json("/view/" + viewName + "/addJobToView", parameters);
+    client.post_json("/view/" + encode(viewName) + "/addJobToView", parameters);
   }
 
   public void removeJobFromView(String jobName, String viewName) throws IOException {
     List<NameValuePair> parameters = new ArrayList<NameValuePair>(3);
     parameters.add(new BasicNameValuePair("name", jobName));
-    client.post_json("/view/" + viewName + "/removeJobFromView", parameters);
+    client.post_json("/view/" + encode(viewName) + "/removeJobFromView", parameters);
   }
 
   public View getView(String viewName) throws IOException {
     try {
-      return client.get("view/" + viewName, View.class);
+      return client.get("view/" + encode(viewName), View.class);
     } catch (HttpResponseException ex) {
       return null;
     }
