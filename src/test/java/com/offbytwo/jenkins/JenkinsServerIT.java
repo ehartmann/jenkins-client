@@ -95,7 +95,7 @@ public class JenkinsServerIT {
 
     @Test
     public void shouldCreateDeleteAView() throws Exception {
-      
+
     }
 
     @Test
@@ -176,5 +176,38 @@ public class JenkinsServerIT {
 
         String confirmXml = server.getJobXml(JENKINS_TEST_JOB);
         assertTrue(confirmXml.contains(description));
+    }
+
+    @Test
+    public void testNodeCreation() throws Exception {
+        assertNull(jenkinsRule.getInstance().getComputer("test-ssh"));
+        Node.SSHLauncher sshLauncher = new Node.SSHLauncher();
+        sshLauncher.setCredentialsId("1");
+        sshLauncher.setHost("192.168.1.53");
+        sshLauncher.setUsername("eric");
+        Node node = new Node();
+        node.setName("test-ssh");
+        node.setLabelString("Test");
+        node.setNumExecutors(1);
+        node.setLauncher(sshLauncher);
+        node.setOffline(true);
+
+        server.createNode(node);
+        assertNotNull(jenkinsRule.getInstance().getComputer("test-ssh"));
+        assertEquals(jenkinsRule.getInstance().getComputer("test-ssh").getNumExecutors(), 1);
+        Thread.sleep(60000);
+
+        assertNull(jenkinsRule.getInstance().getComputer("test-jnlp"));
+        Node.JNLPLauncher jnlpLauncher = new Node.JNLPLauncher();
+        node = new Node();
+        node.setName("test-jnlp");
+        node.setLabelString("Test");
+        node.setNumExecutors(2);
+        node.setLauncher(jnlpLauncher);
+
+        server.createNode(node);
+        assertNotNull(jenkinsRule.getInstance().getComputer("test-jnlp"));
+        assertEquals(jenkinsRule.getInstance().getComputer("test-jnlp").getNumExecutors(), 2);
+        Thread.sleep(60000);
     }
 }

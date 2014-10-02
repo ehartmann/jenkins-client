@@ -142,6 +142,25 @@ public class JenkinsServer {
     }
 
     /**
+     * Get the xml description of an existing promotion
+     *
+     * @return the new job object
+     * @throws IOException
+     */
+    public String getPromotionXml(String jobName, String promotionName) throws IOException {
+        return client.get("/job/" + encode(jobName) + "/promotion/process/" + encode(promotionName) + "/config.xml");
+    }
+
+    /**
+     * Create a job on the server using the provided xml
+     *
+     * @throws IOException
+     */
+    public void updatePromotionXML(String jobName, String promotionName, String jobXml) throws IOException {
+        client.post_xml("/job/" + encode(jobName) + "/promotion/process/" + encode(promotionName) + "/config.xml", jobXml);
+    }
+
+    /**
      * Get the description of an existing Label
      *
      * @return label object

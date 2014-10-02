@@ -317,6 +317,11 @@ public class JenkinsHttpClient {
     HttpPost request = new HttpPost(postApi(path));
     request.setEntity(new UrlEncodedFormEntity(parameters));
     HttpResponse response = null;
+
+    Crumb crumb = get("/crumbIssuer", Crumb.class);
+    if (crumb != null) {
+        request.addHeader(new BasicHeader(crumb.getCrumbRequestField(), crumb.getCrumb()));
+    }
     try {
       response = client.execute(request, localContext);
       int status = response.getStatusLine().getStatusCode();
