@@ -161,6 +161,15 @@ public class JenkinsServer {
     }
 
     /**
+     * Create a job on the server using the provided xml
+     *
+     * @throws IOException
+     */
+    public void createPromotionXML(String jobName, String promotionName, String jobXml) throws IOException {
+        client.post_xml("/job/" + encode(jobName) + "/promotion/createProcess?name=" + encode(promotionName), jobXml);
+    }
+
+    /**
      * Get the description of an existing Label
      *
      * @return label object
