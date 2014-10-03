@@ -118,7 +118,6 @@ public class JenkinsHttpClient {
     }
   }
 
-
   /**
    * Perform a GET request and parse the response to the given class
    *
@@ -164,6 +163,7 @@ public class JenkinsHttpClient {
               return null;
             }
         } finally {
+            EntityUtils.consume(response.getEntity());
             releaseConnection(getMethod);
         }
     }
@@ -177,11 +177,12 @@ public class JenkinsHttpClient {
      */
     public InputStream getFile(URI path) throws IOException {
         HttpGet getMethod = new HttpGet(path);
+        HttpResponse response = client.execute(getMethod, localContext);
         try {
-            HttpResponse response = client.execute(getMethod, localContext);
             httpResponseValidator.validateResponse(response);
             return httpResponseValidator.isNotFound(response) ? null : response.getEntity().getContent();
         } finally {
+            EntityUtils.consume(response.getEntity());
             releaseConnection(getMethod);
         }
     }
@@ -208,8 +209,8 @@ public class JenkinsHttpClient {
             StringEntity stringEntity = new StringEntity(Utils.getJsonMapper().writeValueAsString(data), "application/json");
             request.setEntity(stringEntity);
         }
-        HttpResponse response = client.execute(request, localContext);
 
+        HttpResponse response = client.execute(request, localContext);
         try {
             httpResponseValidator.validateResponse(response);
 
@@ -245,10 +246,9 @@ public class JenkinsHttpClient {
       request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
     }
 
-    HttpResponse response = client.execute(request, localContext);
-    httpResponseValidator.validateResponse(response);
-
+      HttpResponse response = client.execute(request, localContext);
     try {
+      httpResponseValidator.validateResponse(response);
       if (!httpResponseValidator.isNotFound(response)) {
         String result = CharStreams.toString(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
         String[] resultByLines = StringUtils.split(result, "\n");
@@ -285,9 +285,9 @@ public class JenkinsHttpClient {
             request.setEntity(new StringEntity(xml_data, ContentType.APPLICATION_XML));
         }
         HttpResponse response = client.execute(request, localContext);
-        httpResponseValidator.validateResponse(response);
 
         try {
+            httpResponseValidator.validateResponse(response);
             if (!httpResponseValidator.isNotFound(response)) {
               InputStream content = response.getEntity().getContent();
               Scanner s = new Scanner(content);
