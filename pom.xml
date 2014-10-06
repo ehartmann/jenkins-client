@@ -14,7 +14,7 @@
 
     <groupId>com.offbytwo.jenkins</groupId>
     <artifactId>jenkins-client</artifactId>
-    <version>0.2.4-SNAPSHOT</version>
+    <version>0.2.4</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -27,7 +27,7 @@
         <connection>scm:git:git@github.com:ehartmann/jenkins-client.git</connection>
         <developerConnection>scm:git:git@github.com:ehartmann/jenkins-client.git</developerConnection>
         <url>https://github.com/ehartmann/jenkins-client</url>
-      <tag>HEAD</tag>
+      <tag>0.2.4</tag>
   </scm>
 
     <properties>
