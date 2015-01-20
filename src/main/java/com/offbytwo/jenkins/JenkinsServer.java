@@ -165,8 +165,8 @@ public class JenkinsServer {
      *
      * @throws IOException
      */
-    public void createPromotionXML(String jobName, String promotionName, String jobXml) throws IOException {
-        client.post_xml("/job/" + encode(jobName) + "/promotion/createProcess?name=" + encode(promotionName), jobXml);
+    public String createPromotionXML(String jobName, String promotionName, String jobXml) throws IOException {
+        return client.post_xml("/job/" + encode(jobName) + "/promotion/createProcess?name=" + encode(promotionName), jobXml);
     }
 
     /**
@@ -246,6 +246,15 @@ public class JenkinsServer {
   public List<View> getViews() throws IOException {
     return client.get("/", MainView.class).getViews();
   }
+
+    /*
+     * Delete a job from jenkins
+     *
+     * @throws IOException
+     */
+    public void deleteJob(String jobName) throws IOException {
+        client.post("/job/" + encode(jobName) + "/doDelete");
+    }
 
   public String executeScript(String script) throws IOException {
       return client.executeScript(script);
