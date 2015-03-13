@@ -14,20 +14,29 @@ import com.offbytwo.jenkins.tools.Utils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.message.BasicNameValuePair;
+import org.jdom2.Content;
+import org.jdom2.JDOMException;
+import org.jdom2.filter.Filters;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The main starting point for interacting with a Jenkins server.
  */
 public class JenkinsServer {
     private final JenkinsHttpClient client;
-
+    private final static XPathFactory XPATH_FACTORY = XPathFactory.instance();
+    private final static XPathExpression<Content> JOB_NAMES = XPATH_FACTORY.compile("/hudson.model.ListView/jobNames/string//text()", Filters.content());
     /**
      * Create a new Jenkins server reference given only the server address
      *
@@ -245,6 +254,11 @@ public class JenkinsServer {
 
   public List<View> getViews() throws IOException {
     return client.get("/", MainView.class).getViews();
+  }
+
+  public List<String> getJobsOnView(String viewName) throws IOException, JDOMException {
+    String result = client.get("view/" + encode(viewName) + "/config.xml");
+    return JOB_NAMES.evaluate(new SAXBuilder().build(new StringReader(result))).stream().map(c -> c.getValue()).collect(Collectors.toList());
   }
 
     /*

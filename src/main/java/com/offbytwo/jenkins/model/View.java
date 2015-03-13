@@ -1,5 +1,6 @@
 package com.offbytwo.jenkins.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  * Time: 14:12
  */
 public class View extends BaseModel {
-  List<Job> jobs;
+  List<Job> jobs = new ArrayList<Job>();
   String description;
   String name;
   List<String> properties;
@@ -20,7 +21,11 @@ public class View extends BaseModel {
   }
 
   public void setJobs(List<Job> jobs) {
-    this.jobs = jobs;
+      if (jobs == null) {
+          this.jobs = new ArrayList<Job>();
+      } else {
+          this.jobs = jobs;
+      }
   }
 
   public String getDescription() {
